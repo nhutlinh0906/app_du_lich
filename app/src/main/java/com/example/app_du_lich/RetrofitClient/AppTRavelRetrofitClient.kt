@@ -1,158 +1,97 @@
 package com.example.lapstore.api
 
-
-import com.example.app_du_lich.api.EvaluateAPIService
-import com.example.app_du_lich.api.EventAPIService
-import com.example.app_du_lich.api.FavouriteAPIService
-import com.example.app_du_lich.api.HistoryOfVisitAPIService
-import com.example.app_du_lich.api.LocationnAPIService
-import com.example.app_du_lich.api.MessageAPIService
-import com.example.app_du_lich.api.NotificationAPIService
-import com.example.app_du_lich.api.ProductAPIService
-import com.example.app_du_lich.api.ScheduleAPIService
-import com.example.app_du_lich.api.SearchHistoryAPIService
-import com.example.app_du_lich.api.StatisticalAPIService
-import com.example.app_du_lich.api.SuggestAPIService
-import com.example.app_du_lich.api.SystemNotificationAPIService
-import com.example.app_du_lich.api.TravelItineraryAPIService
-import com.example.app_du_lich.api.TypeLocationAPIService
-import com.example.app_du_lich.api.UserAPIService
-import com.example.app_du_lich.api.VoiceAPIService
+import com.example.app_du_lich.api.*
 import com.google.gson.GsonBuilder
+import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
 object Constants {
-//    const val BASE_URL = "http://chillcup.io.vn/ITLabRoomAPI/api/"
-const val BASE_URL = "http://172.19.200.197/api_travel/api/"
+    // Base URL cho emulator (localhost trên máy)
+    const val BASE_URL = "http://10.0.2.2/api_travel/api/"
+    // Nếu test trên thiết bị thật, thay bằng IP của máy chạy XAMPP, ví dụ:
+    // const val BASE_URL = "http://192.168.x.x/api_travel/api/"
 }
 
 object AppTRavelRetrofitClient {
+    // Tạo một instance Retrofit duy nhất
+    private val retrofit: Retrofit by lazy {
+        val client = OkHttpClient.Builder()
+            .build()
 
-    // locations : kết nối địa điểm
+        Retrofit.Builder()
+            .baseUrl(Constants.BASE_URL)
+            .client(client)
+            .addConverterFactory(GsonConverterFactory.create(GsonBuilder().create()))
+            .build()
+    }
 
+    // Khởi tạo các service
     val userAPIService: UserAPIService by lazy {
-        Retrofit.Builder()
-            .baseUrl(Constants.BASE_URL)
-            .addConverterFactory(GsonConverterFactory.create(GsonBuilder().create()))
-            .build()
-            .create(UserAPIService::class.java)
+        retrofit.create(UserAPIService::class.java)
     }
+
     val evaluateAPIService: EvaluateAPIService by lazy {
-        Retrofit.Builder()
-            .baseUrl(Constants.BASE_URL)
-            .addConverterFactory(GsonConverterFactory.create(GsonBuilder().create()))
-            .build()
-            .create(EvaluateAPIService::class.java)
+        retrofit.create(EvaluateAPIService::class.java)
     }
+
     val eventAPIService: EventAPIService by lazy {
-        Retrofit.Builder()
-            .baseUrl(Constants.BASE_URL)
-            .addConverterFactory(GsonConverterFactory.create(GsonBuilder().create()))
-            .build()
-            .create(EventAPIService::class.java)
+        retrofit.create(EventAPIService::class.java)
     }
+
     val favouriteAPIService: FavouriteAPIService by lazy {
-        Retrofit.Builder()
-            .baseUrl(Constants.BASE_URL)
-            .addConverterFactory(GsonConverterFactory.create(GsonBuilder().create()))
-            .build()
-            .create(FavouriteAPIService::class.java)
+        retrofit.create(FavouriteAPIService::class.java)
     }
+
     val historyOfVisitAPIService: HistoryOfVisitAPIService by lazy {
-        Retrofit.Builder()
-            .baseUrl(Constants.BASE_URL)
-            .addConverterFactory(GsonConverterFactory.create(GsonBuilder().create()))
-            .build()
-            .create(HistoryOfVisitAPIService::class.java)
+        retrofit.create(HistoryOfVisitAPIService::class.java)
     }
+
     val locationnAPIService: LocationnAPIService by lazy {
-        Retrofit.Builder()
-            .baseUrl(Constants.BASE_URL)
-            .addConverterFactory(GsonConverterFactory.create(GsonBuilder().create()))
-            .build()
-            .create(LocationnAPIService::class.java)
+        retrofit.create(LocationnAPIService::class.java)
     }
+
     val messageAPIService: MessageAPIService by lazy {
-        Retrofit.Builder()
-            .baseUrl(Constants.BASE_URL)
-            .addConverterFactory(GsonConverterFactory.create(GsonBuilder().create()))
-            .build()
-            .create(MessageAPIService::class.java)
+        retrofit.create(MessageAPIService::class.java)
     }
+
     val notificationAPIService: NotificationAPIService by lazy {
-        Retrofit.Builder()
-            .baseUrl(Constants.BASE_URL)
-            .addConverterFactory(GsonConverterFactory.create(GsonBuilder().create()))
-            .build()
-            .create(NotificationAPIService::class.java)
+        retrofit.create(NotificationAPIService::class.java)
     }
+
     val productAPIService: ProductAPIService by lazy {
-        Retrofit.Builder()
-            .baseUrl(Constants.BASE_URL)
-            .addConverterFactory(GsonConverterFactory.create(GsonBuilder().create()))
-            .build()
-            .create(ProductAPIService::class.java)
+        retrofit.create(ProductAPIService::class.java)
     }
+
     val scheduleAPIService: ScheduleAPIService by lazy {
-        Retrofit.Builder()
-            .baseUrl(Constants.BASE_URL)
-            .addConverterFactory(GsonConverterFactory.create(GsonBuilder().create()))
-            .build()
-            .create(ScheduleAPIService::class.java)
+        retrofit.create(ScheduleAPIService::class.java)
     }
+
     val searchHistoryAPIService: SearchHistoryAPIService by lazy {
-        Retrofit.Builder()
-            .baseUrl(Constants.BASE_URL)
-            .addConverterFactory(GsonConverterFactory.create(GsonBuilder().create()))
-            .build()
-            .create(SearchHistoryAPIService::class.java)
+        retrofit.create(SearchHistoryAPIService::class.java)
     }
+
     val statisticalAPIService: StatisticalAPIService by lazy {
-        Retrofit.Builder()
-            .baseUrl(Constants.BASE_URL)
-            .addConverterFactory(GsonConverterFactory.create(GsonBuilder().create()))
-            .build()
-            .create(StatisticalAPIService::class.java)
+        retrofit.create(StatisticalAPIService::class.java)
     }
+
     val suggestAPIService: SuggestAPIService by lazy {
-        Retrofit.Builder()
-            .baseUrl(Constants.BASE_URL)
-            .addConverterFactory(GsonConverterFactory.create(GsonBuilder().create()))
-            .build()
-            .create(SuggestAPIService::class.java)
+        retrofit.create(SuggestAPIService::class.java)
     }
+
     val systemNotificationAPIService: SystemNotificationAPIService by lazy {
-        Retrofit.Builder()
-            .baseUrl(Constants.BASE_URL)
-            .addConverterFactory(GsonConverterFactory.create(GsonBuilder().create()))
-            .build()
-            .create(SystemNotificationAPIService::class.java)
+        retrofit.create(SystemNotificationAPIService::class.java)
     }
+
     val travelItineraryAPIService: TravelItineraryAPIService by lazy {
-        Retrofit.Builder()
-            .baseUrl(Constants.BASE_URL)
-            .addConverterFactory(GsonConverterFactory.create(GsonBuilder().create()))
-            .build()
-            .create(TravelItineraryAPIService::class.java)
+        retrofit.create(TravelItineraryAPIService::class.java)
     }
+
     val typeLocationAPIService: TypeLocationAPIService by lazy {
-        Retrofit.Builder()
-            .baseUrl(Constants.BASE_URL)
-            .addConverterFactory(GsonConverterFactory.create(GsonBuilder().create()))
-            .build()
-            .create(TypeLocationAPIService::class.java)
+        retrofit.create(TypeLocationAPIService::class.java)
     }
+
     val voiceAPIService: VoiceAPIService by lazy {
-        Retrofit.Builder()
-            .baseUrl(Constants.BASE_URL)
-            .addConverterFactory(GsonConverterFactory.create(GsonBuilder().create()))
-            .build()
-            .create(VoiceAPIService::class.java)
+        retrofit.create(VoiceAPIService::class.java)
     }
-
 }
-// khởi tạo và cung cấp Retrofit client để gọi API. AppTRavelRetrofitClient.kt
-
-
-

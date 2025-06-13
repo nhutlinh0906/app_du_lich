@@ -1,6 +1,5 @@
 package com.example.app_du_lich.views
 
-
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -9,6 +8,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material3.*
@@ -21,15 +21,16 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import com.example.app_du_lich.models.User
+import com.example.app_du_lich.viewmodels.UserViewModel
 import java.util.*
 
 val pinkColor = Color(0xFFFF69B4)
-val lightPinkColor = Color(0xFFFFFF)
+val lightPinkColor = Color(0xFFFFFFFF)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun PersonalInfoScreen(navController: NavController) {
-
+fun PersonalInfoScreen(navController: NavController, viewModel: UserViewModel, userId: Int) {
     var fullName by remember { mutableStateOf("") }
     var phoneNumber by remember { mutableStateOf("") }
     var birthDate by remember { mutableStateOf("") }
@@ -41,10 +42,24 @@ fun PersonalInfoScreen(navController: NavController) {
     var showGenderDropdown by remember { mutableStateOf(false) }
     var showDatePicker by remember { mutableStateOf(false) }
     val genderOptions = listOf("Nam", "Nữ", "Khác")
-
     val scrollState = rememberScrollState()
 
-    // DatePicker Dialog
+    LaunchedEffect(userId) {
+        viewModel.fetchUserById(userId)
+    }
+
+    LaunchedEffect(viewModel.user) {
+        viewModel.user?.let { user ->
+            fullName = user.nameUser ?: ""
+            phoneNumber = user.phoneUser ?: ""
+            birthDate = user.dataCreateUser ?: ""
+            selectedGender = user.genderUser ?: "Khác"
+            email = user.emailUser ?: ""
+            address = user.addressUser ?: ""
+            deliveryAddress = user.addressUser ?: ""
+        }
+    }
+
     if (showDatePicker) {
         val datePickerState = rememberDatePickerState(
             initialSelectedDateMillis = System.currentTimeMillis()
@@ -72,7 +87,7 @@ fun PersonalInfoScreen(navController: NavController) {
                 TextButton(
                     onClick = { showDatePicker = false }
                 ) {
-                    Text("Cancel")
+                    Text("Hủy")
                 }
             }
         ) {
@@ -85,12 +100,20 @@ fun PersonalInfoScreen(navController: NavController) {
             TopAppBar(
                 title = {
                     Text(
-                        " Thông tin cá nhân",
+                        "Thông tin cá nhân",
                         color = Color.White,
                         fontWeight = FontWeight.Medium
                     )
                 },
-
+                navigationIcon = {
+                    IconButton(onClick = { navController.popBackStack() }) {
+                        Icon(
+                            imageVector = Icons.Default.ArrowBack,
+                            contentDescription = "Quay lại",
+                            tint = Color.White
+                        )
+                    }
+                },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = pinkColor
                 )
@@ -103,9 +126,9 @@ fun PersonalInfoScreen(navController: NavController) {
                 .background(lightPinkColor)
                 .padding(paddingValues)
                 .padding(16.dp)
-                .verticalScroll(scrollState)
+                .verticalScroll(scrollState),
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // Họ và tên
             FormField(
                 label = "Họ và tên",
                 isRequired = true,
@@ -116,34 +139,12 @@ fun PersonalInfoScreen(navController: NavController) {
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Liên hệ
-            FormField(
-                label = "Liên hệ",
-                isRequired = true,
-                value = phoneNumber,
-                onValueChange = { phoneNumber = it },
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone)
-            )
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            // Ngày sinh
             Column {
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text(
-                        text = "Ngày sinh",
-                        fontSize = 14.sp,
-                        color = Color(0xFF333333)
-                    )
-                    Text(
-                        text = " (*)",
-                        fontSize = 12.sp,
-                        color = Color.Red
-                    )
+                    Text("Ngày sinh", fontSize = 14.sp, color = Color(0xFF333333))
+                    Text(" (*)", fontSize = 12.sp, color = Color.Red)
                 }
-
                 Spacer(modifier = Modifier.height(8.dp))
-
                 OutlinedTextField(
                     value = birthDate,
                     onValueChange = { birthDate = it },
@@ -157,7 +158,7 @@ fun PersonalInfoScreen(navController: NavController) {
                         focusedBorderColor = pinkColor,
                         unfocusedBorderColor = Color.LightGray
                     ),
-                            trailingIcon = {
+                    trailingIcon = {
                         Icon(
                             imageVector = Icons.Default.CalendarMonth,
                             contentDescription = "Calendar",
@@ -171,23 +172,12 @@ fun PersonalInfoScreen(navController: NavController) {
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Giới tính
             Column {
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text(
-                        text = "Giới tính",
-                        fontSize = 14.sp,
-                        color = Color(0xFF333333)
-                    )
-                    Text(
-                        text = " (*)",
-                        fontSize = 12.sp,
-                        color = Color.Red
-                    )
+                    Text("Giới tính", fontSize = 14.sp, color = Color(0xFF333333))
+                    Text(" (*)", fontSize = 12.sp, color = Color.Red)
                 }
-
                 Spacer(modifier = Modifier.height(8.dp))
-
                 Box {
                     OutlinedTextField(
                         value = selectedGender,
@@ -209,13 +199,11 @@ fun PersonalInfoScreen(navController: NavController) {
                         },
                         readOnly = true
                     )
-
                     Box(
                         modifier = Modifier
                             .matchParentSize()
                             .clickable { showGenderDropdown = true }
                     )
-
                     DropdownMenu(
                         expanded = showGenderDropdown,
                         onDismissRequest = { showGenderDropdown = false },
@@ -236,7 +224,6 @@ fun PersonalInfoScreen(navController: NavController) {
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Email
             FormField(
                 label = "Email",
                 isRequired = false,
@@ -247,7 +234,6 @@ fun PersonalInfoScreen(navController: NavController) {
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Địa chỉ
             FormField(
                 label = "Địa chỉ",
                 isRequired = false,
@@ -258,22 +244,43 @@ fun PersonalInfoScreen(navController: NavController) {
 
             Spacer(modifier = Modifier.height(32.dp))
 
-            // Nút Lưu
+            viewModel.updateSuccessMessage?.let {
+                Text(text = it, color = Color.Green, fontSize = 14.sp, modifier = Modifier.padding(bottom = 8.dp))
+            }
+            viewModel.updateErrorMessage?.let {
+                Text(text = it, color = Color.Red, fontSize = 14.sp, modifier = Modifier.padding(bottom = 8.dp))
+            }
+
             Button(
-                onClick = {navController.navigate("MyAccountScreen") },
+                onClick = {
+                    val user = User(
+                        idUser = userId,
+                        phoneUser = phoneNumber.takeIf { it.isNotBlank() },
+                        nameUser = fullName.takeIf { it.isNotBlank() },
+                        passwordUser = null,
+                        emailUser = email.takeIf { it.isNotBlank() },
+                        avataUser = null,
+                        addressUser = address.takeIf { it.isNotBlank() },
+                        hobbiUser = null,
+                        genderUser = selectedGender.takeIf { it.isNotBlank() },
+                        statusUser = null,
+                        dataCreateUser = birthDate.takeIf { it.isNotBlank() },
+                        dataUpdateUser = null
+                    )
+                    viewModel.updateUser(user)
+                },
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(56.dp),
                 shape = RoundedCornerShape(8.dp),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = pinkColor
-                )
+                colors = ButtonDefaults.buttonColors(containerColor = pinkColor),
+                enabled = !viewModel.isLoading
             ) {
-                Text(
-                    text = "Lưu",
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.Bold
-                )
+                if (viewModel.isLoading) {
+                    CircularProgressIndicator(color = Color.White, modifier = Modifier.size(24.dp))
+                } else {
+                    Text(text = "Lưu", fontSize = 16.sp, fontWeight = FontWeight.Bold)
+                }
             }
         }
     }
@@ -290,22 +297,12 @@ fun FormField(
 ) {
     Column {
         Row(verticalAlignment = Alignment.CenterVertically) {
-            Text(
-                text = label,
-                fontSize = 14.sp,
-                color = Color(0xFF333333)
-            )
+            Text(text = label, fontSize = 14.sp, color = Color(0xFF333333))
             if (isRequired) {
-                Text(
-                    text = " (*)",
-                    fontSize = 12.sp,
-                    color = Color.Red
-                )
+                Text(text = " (*)", fontSize = 12.sp, color = Color.Red)
             }
         }
-
         Spacer(modifier = Modifier.height(8.dp))
-
         OutlinedTextField(
             value = value,
             onValueChange = onValueChange,
@@ -317,7 +314,7 @@ fun FormField(
                 focusedBorderColor = pinkColor,
                 unfocusedBorderColor = Color.LightGray
             ),
-                    keyboardOptions = keyboardOptions
+            keyboardOptions = keyboardOptions
         )
     }
 }

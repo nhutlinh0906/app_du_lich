@@ -20,20 +20,34 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import com.example.app_du_lich.viewmodels.UserViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LoginScreen(navController: NavController) {
-    var username by remember { mutableStateOf("") }
+    var phoneNumber by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
-
-
     var passwordVisible by remember { mutableStateOf(false) }
 
-    var showError by remember { mutableStateOf(false) }
-
     val pinkBackground = Color(0xFFFF69B4)
+
+    val userViewModel: UserViewModel = viewModel()
+    val loginResult = userViewModel.loginResult
+    val loginError = userViewModel.loginError
+    val isLoading = userViewModel.isLoading
+
+    var showValidationError by remember { mutableStateOf(false) }
+
+    // Điều hướng khi đăng nhập thành công
+    LaunchedEffect(loginResult) {
+        if (loginResult != null && loginResult.success) {
+            navController.navigate("HomeScreen") {
+                popUpTo("LoginScreen") { inclusive = true }
+            }
+        }
+    }
 
     Box(
         modifier = Modifier
@@ -45,19 +59,8 @@ fun LoginScreen(navController: NavController) {
                 .fillMaxSize()
                 .padding(16.dp)
         ) {
-            // Header with back button (hiện tại để trống)
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 16.dp, bottom = 32.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                // Bạn có thể thêm nút back nếu muốn
-            }
-
             Spacer(modifier = Modifier.height(60.dp))
 
-            // White container
             Card(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -80,32 +83,31 @@ fun LoginScreen(navController: NavController) {
                         color = Color.Black
                     )
 
-                    // Username
                     OutlinedTextField(
-                        value = username,
+                        value = phoneNumber,
                         onValueChange = {
-                            username = it
-                            if (showError) showError = false
+                            phoneNumber = it
+                            if (showValidationError) showValidationError = false
                         },
-                        placeholder = { Text("Tên đăng nhập", color = Color.Gray) },
+                        placeholder = { Text("Số điện thoại", color = Color.Gray) },
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(56.dp),
                         shape = RoundedCornerShape(12.dp),
                         colors = OutlinedTextFieldDefaults.colors(
-                            focusedBorderColor = if (showError && username.isEmpty()) Color.Red else Color.Gray,
-                            unfocusedBorderColor = if (showError && username.isEmpty()) Color.Red else Color.Gray
+                            focusedBorderColor = if (showValidationError && phoneNumber.isEmpty()) Color.Red else Color.Gray,
+                            unfocusedBorderColor = if (showValidationError && phoneNumber.isEmpty()) Color.Red else Color.Gray
                         ),
                         singleLine = true,
-                        isError = showError && username.isEmpty()
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
+                        isError = showValidationError && phoneNumber.isEmpty()
                     )
 
-                    // Password với icon con mắt
                     OutlinedTextField(
                         value = password,
                         onValueChange = {
                             password = it
-                            if (showError) showError = false
+                            if (showValidationError) showValidationError = false
                         },
                         placeholder = { Text("Mật khẩu", color = Color.Gray) },
                         modifier = Modifier
@@ -113,27 +115,21 @@ fun LoginScreen(navController: NavController) {
                             .height(56.dp),
                         shape = RoundedCornerShape(12.dp),
                         colors = OutlinedTextFieldDefaults.colors(
-                            focusedBorderColor = if (showError && password.isEmpty()) Color.Red else Color.Gray,
-                            unfocusedBorderColor = if (showError && password.isEmpty()) Color.Red else Color.Gray
+                            focusedBorderColor = if (showValidationError && password.isEmpty()) Color.Red else Color.Gray,
+                            unfocusedBorderColor = if (showValidationError && password.isEmpty()) Color.Red else Color.Gray
                         ),
                         visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
                         trailingIcon = {
-                            val image = if (passwordVisible)
-                                Icons.Filled.Visibility
-                            else Icons.Filled.VisibilityOff
+                            val image = if (passwordVisible) Icons.Filled.Visibility else Icons.Filled.VisibilityOff
                             IconButton(onClick = { passwordVisible = !passwordVisible }) {
-                                Icon(
-                                    imageVector = image,
-                                    contentDescription = if (passwordVisible) "Ẩn mật khẩu" else "Hiện mật khẩu"
-                                )
+                                Icon(imageVector = image, contentDescription = null)
                             }
                         },
                         singleLine = true,
-                        isError = showError && password.isEmpty()
+                        isError = showValidationError && password.isEmpty()
                     )
 
-                    // Nút Quên mật khẩu
                     Text(
                         text = "Quên mật khẩu?",
                         modifier = Modifier
@@ -148,37 +144,48 @@ fun LoginScreen(navController: NavController) {
                         fontWeight = FontWeight.Medium
                     )
 
-                    // Hiện thông báo lỗi nếu có
-                    if (showError) {
-                        Text(
-                            text = "Vui lòng điền đầy đủ thông tin",
-                            color = Color.Red,
-                            fontSize = 14.sp,
-                            modifier = Modifier.fillMaxWidth(),
-                            textAlign = TextAlign.Center
-                        )
+                    // THÔNG BÁO LỖI
+                    when {
+                        showValidationError -> {
+                            Text(
+                                text = "Vui lòng điền đầy đủ thông tin",
+                                color = Color.Red,
+                                fontSize = 14.sp,
+                                modifier = Modifier.fillMaxWidth(),
+                                textAlign = TextAlign.Center
+                            )
+                        }
+
+                        loginError != null -> {
+                            Text(
+                                text = loginError,
+                                color = Color.Red,
+                                fontSize = 14.sp,
+                                modifier = Modifier.fillMaxWidth(),
+                                textAlign = TextAlign.Center
+                            )
+                        }
                     }
 
                     Spacer(modifier = Modifier.height(10.dp))
 
-                    // Login Button
                     Button(
                         onClick = {
-                            if (username.isBlank() || password.isBlank()) {
-                                showError = true
+                            if (phoneNumber.isBlank() || password.isBlank()) {
+                                showValidationError = true
                             } else {
-                                showError = false
-                                // Xử lý đăng nhập thành công, ví dụ:
-                                 navController.navigate("HomeScreen")
+                                showValidationError = false
+                                userViewModel.loginUser(phoneNumber, password)
                             }
                         },
                         shape = RoundedCornerShape(12.dp),
                         modifier = Modifier
                             .fillMaxWidth(0.5f)
-                            .height(48.dp)
+                            .height(48.dp),
+                        enabled = !isLoading
                     ) {
                         Text(
-                            text = "Đăng Nhập",
+                            text = if (isLoading) "Đang đăng nhập..." else "Đăng Nhập",
                             fontSize = 16.sp,
                             fontWeight = FontWeight.Bold
                         )
@@ -188,7 +195,6 @@ fun LoginScreen(navController: NavController) {
 
             Spacer(modifier = Modifier.weight(1f))
 
-            // Sign up link
             Text(
                 text = "Bạn chưa có tài khoản? Đăng ký",
                 modifier = Modifier

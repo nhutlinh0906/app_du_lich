@@ -3,11 +3,15 @@ package com.example.datn.ui.theme
 import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.compose.runtime.Composable
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.NavHostController
+import androidx.navigation.NavType
+import androidx.navigation.navArgument
 import com.example.app_du_lich.EvaluateScreen
 import com.example.app_du_lich.LoginScreen
+import com.example.app_du_lich.viewmodels.UserViewModel
 import com.example.app_du_lich.views.ChatScreenChaS.kt.ChatScreen
 import com.example.app_du_lich.views.ContactScreen.kt.ContactScreen
 import com.example.app_du_lich.views.DeveloperProductScreen.kt.DeveloperProductScreen
@@ -19,7 +23,6 @@ import com.example.app_du_lich.views.LocationManagementScreen
 import com.example.app_du_lich.views.MyAccountScreen
 import com.example.app_du_lich.views.PersonalInfoScreen
 import com.example.app_du_lich.views.RouteScreen
-import com.example.datn.ui.theme.navigation.Screen.PersonalSchedule
 import com.example.myapplication.ui.theme.HomeScreen
 import com.example.myapplication.ui.theme.NotificationScreen
 
@@ -32,14 +35,17 @@ fun NavGraph(navController: NavHostController) {
             LoginScreen(navController = navController)
         }
         composable("RegisterScreen") {
-            RegisterScreen(navController = navController)
+            val userViewModel: UserViewModel = viewModel()
+            RegisterScreen(navController = navController, viewModel = userViewModel)
         }
+
         composable("ChatScreen") {
             ChatScreen(navController = navController)
         }
         composable("HomeScreen") {
             HomeScreen(navController = navController)
-       }
+        }
+
         composable("ContactScreen") {
             ContactScreen(navController = navController)
         }
@@ -83,9 +89,9 @@ fun NavGraph(navController: NavHostController) {
         composable("NotificationScreen") {
             NotificationScreen(navController = navController)
         }
-       // composable("PersonalScheduleScreen") {
+        // composable("PersonalScheduleScreen") {
         //    PersonalScheduleScreen(navController = navController)
-      //  }
+        //  }
 
         composable("ProfileSettingsScreen") {
             ProfileSettingsScreen(navController = navController)
@@ -102,18 +108,27 @@ fun NavGraph(navController: NavHostController) {
         composable("TourHistoryDetails") {
             TourHistoryDetails  (navController = navController)
         }
-
         composable("ForgotPasswordScreen") {
             ForgotPasswordScreen(navController = navController)
         }
         composable("MyAccountScreen") {
-            MyAccountScreen(navController = navController)
+            val userViewModel: UserViewModel = viewModel()
+            MyAccountScreen(navController = navController, viewModel = userViewModel)
         }
         composable("ForgotPasswordScreen") {
             ForgotPasswordScreen(navController = navController)
         }
-        composable("PersonalInfoScreen") {
-            PersonalInfoScreen(navController = navController)
+        composable(
+            route = "PersonalInfoScreen/{userId}",
+            arguments = listOf(navArgument("userId") { type = NavType.IntType })
+        ) {
+            val userViewModel: UserViewModel = viewModel()
+            val userId = it.arguments?.getInt("userId") ?: 0
+            PersonalInfoScreen(
+                navController = navController,
+                viewModel = userViewModel,
+                userId = userId
+            )
         }
         composable("EvaluateScreen") {
             EvaluateScreen(navController = navController)

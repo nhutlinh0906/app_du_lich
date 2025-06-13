@@ -16,6 +16,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.compose.rememberNavController
 import com.example.app_du_lich.ui.theme.App_du_lichTheme
 import com.example.app_du_lich.viewmodels.EvaluateViewModel
 import com.example.app_du_lich.viewmodels.EventViewModel
@@ -34,6 +35,7 @@ import com.example.app_du_lich.viewmodels.TravelItineraryViewModel
 import com.example.app_du_lich.viewmodels.TypeLocationViewModel
 import com.example.app_du_lich.viewmodels.UserViewModel
 import com.example.app_du_lich.viewmodels.VoiceViewModel
+import com.example.datn.ui.theme.NavGraph
 
 class MainActivity : ComponentActivity() {
     @RequiresApi(Build.VERSION_CODES.O)
@@ -42,18 +44,14 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             App_du_lichTheme {
-                val voiceViewModel: VoiceViewModel = viewModel()
-
-                LaunchedEffect(Unit) {
-                    voiceViewModel.getAllVoices()
-                }
-
-                HienDS(voiceViewModel)
+                val navController = rememberNavController()
+                NavGraph(navController = navController)
+            }
             }
         }
     }
-}
-@Composable
+
+/*@Composable
 fun HienDS(userViewModel: UserViewModel) {
     val users = userViewModel.userList
     val isLoading = userViewModel.isLoading
@@ -89,7 +87,7 @@ fun HienDS(userViewModel: UserViewModel) {
                             Text(text = "SĐT: ${user.phone_user}")
                             Text(text = "Email: ${user.email_user ?: "Chưa có"}")
                             Text(text = "Địa chỉ: ${user.address_user ?: "Chưa có"}")
-                            Text(text = "Giới tính: ${if (user.gender_user == true) "Nam" else if (user.gender_user == false) "Nữ" else "Không rõ"}")
+                            Text(text = "Giới tính: ${user.gender_user?:"Chưa có"}" )
                             Text(text = "Trạng thái: ${user.status_user ?: "Không rõ"}")
                             Text(text = "Ngày tạo: ${user.data_create_user}")
                             Text(text = "Ngày cập nhật: ${user.data_update_user ?: "Chưa cập nhật"}")
@@ -99,7 +97,7 @@ fun HienDS(userViewModel: UserViewModel) {
             }
         }
     }
-}
+}*/
 @Composable
 fun HienDS(evaluateViewModel: EvaluateViewModel) {
     val evaluates = evaluateViewModel.evaluateList

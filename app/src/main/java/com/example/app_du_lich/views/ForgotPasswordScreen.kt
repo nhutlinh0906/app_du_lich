@@ -16,17 +16,37 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
-
+import com.example.app_du_lich.viewmodels.UserViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ForgotPasswordScreen(navController: NavController) {
+fun ForgotPasswordScreen(
+    navController: NavController,
+    userViewModel: UserViewModel = viewModel()
+) {
     var username by remember { mutableStateOf("") }
     var newPassword by remember { mutableStateOf("") }
     var confirmPassword by remember { mutableStateOf("") }
 
     val pinkBackground = Color(0xFFFF69B4)
+
+    // Reset messages when screen is recomposed
+    LaunchedEffect(Unit) {
+        userViewModel.forgotPasswordSuccessMessage = null
+        userViewModel.forgotPasswordErrorMessage = null
+    }
+
+    // Navigate back to LoginScreen on success
+    LaunchedEffect(userViewModel.forgotPasswordSuccessMessage) {
+        if (userViewModel.forgotPasswordSuccessMessage != null) {
+            navController.navigate("LoginScreen") {
+                popUpTo(navController.graph.startDestinationId)
+                launchSingleTop = true
+            }
+        }
+    }
 
     Box(
         modifier = Modifier
@@ -45,7 +65,7 @@ fun ForgotPasswordScreen(navController: NavController) {
                     .padding(top = 16.dp, bottom = 32.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                IconButton(onClick = {navController.navigate("LoginScreen") }) {
+                IconButton(onClick = { navController.navigate("LoginScreen") }) {
                     Icon(
                         imageVector = Icons.Default.ArrowBack,
                         contentDescription = "Back",
@@ -82,11 +102,11 @@ fun ForgotPasswordScreen(navController: NavController) {
                         color = Color.Black
                     )
 
-                    // Username
+                    // Username (Phone number)
                     OutlinedTextField(
                         value = username,
                         onValueChange = { username = it },
-                        placeholder = { Text("Tên đăng nhập", color = Color.Gray) },
+                        placeholder = { Text("Nhập số điện thoại", color = Color.Gray) },
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(56.dp),
@@ -95,7 +115,8 @@ fun ForgotPasswordScreen(navController: NavController) {
                             focusedBorderColor = Color.Gray,
                             unfocusedBorderColor = Color.Gray
                         ),
-                        singleLine = true
+                        singleLine = true,
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone)
                     )
 
                     // New Password
@@ -134,17 +155,22 @@ fun ForgotPasswordScreen(navController: NavController) {
                         singleLine = true
                     )
 
+                    // Error Message
+                    userViewModel.forgotPasswordErrorMessage?.let {
+                        Text(
+                            text = it,
+                            color = Color.Red,
+                            fontSize = 14.sp,
+                            modifier = Modifier.padding(top = 8.dp)
+                        )
+                    }
+
                     Spacer(modifier = Modifier.height(10.dp))
 
                     // Reset Button
                     Button(
                         onClick = {
-                            // TODO: Xử lý kiểm tra và đặt lại mật khẩu ở đây
-                            if (newPassword == confirmPassword && newPassword.isNotBlank() && username.isNotBlank()) {
-                                // Thực hiện reset password
-                            } else {
-                                // Báo lỗi nếu mật khẩu không khớp
-                            }
+                            userViewModel.forgotPassword(username, newPassword, confirmPassword)
                         },
                         shape = RoundedCornerShape(12.dp),
                         modifier = Modifier
@@ -161,7 +187,6 @@ fun ForgotPasswordScreen(navController: NavController) {
             }
 
             Spacer(modifier = Modifier.weight(1f))
-
         }
     }
 }
